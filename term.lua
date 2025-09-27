@@ -124,6 +124,7 @@ local function CharGroups()
 end
 
 local mc = MakeChars()
+
 mc:makechars("HELLO WORLD")
 print(mc:programLength())
 
