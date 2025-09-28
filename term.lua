@@ -236,6 +236,6 @@ local function Lexer()
 end
 
 local mc = MakeChars()
+
 mc:makechars("HELLO WORLD")
 print(mc:programLength())
-
