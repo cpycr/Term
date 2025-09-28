@@ -230,12 +230,227 @@ local function Lexer()
 					goto CONTINUE
 				end
 			end
+			return tokens
 		end
 	}
 	return XLexer
 end
 
-local mc = MakeChars()
+local function ParseHelpers()
+	local pp = {}
+	local XParseHelpers = {
+		makeTokens = function (self, tokens)
+			pp.tokens = tokens
+			pp.tokensLength = #tokens
+		end,
+		tokensLength = function (self)
+			return pp.tokensLength
+		end,
+		getToken = function (self)
+			local tokens = pp.tokens
+			local currentToken = shift(tokens)
+			pp.tokens = tokens
+			pp.tokensLength = #tokens
+			return currentToken
+		end,
+		nextToken = function (self)
+			local tokens = pp.tokens
+			return tokens[1]
+		end,
+		putToken = function (self, token)
+			local tokens = pp.tokens
+			unshift(tokens, token)
+			pp.tokens = tokens
+			pp.tokensLength = #tokens
+		end
+	}
+	return XParseHelpers
+end
 
-mc:makechars("HELLO WORLD")
-print(mc:programLength())
+local function FunctionBody(fields)
+	local pp = {}
+	local XFunctionBody = {
+		tokens = fields.tokens,
+		makeBlockTokens = function (self, tokens)
+			pp.blockTokens = tokens
+			pp.blockTokensLength = #tokens
+		end,
+		blockTokensLength = function (self)
+			return pp.blockTokensLength
+		end,
+		getBlockToken = function (self)
+			local tokens = pp.blockTokens
+			local currentToken = shift(tokens)
+			pp.blockTokens = tokens
+			pp.blockTokensLength = #tokens
+			return currentToken
+		end,
+		nextBlockToken = function (self)
+			local tokens = pp.blockTokens
+			return tokens[1]
+		end,
+		putBlockToken = function (self, token)
+			local tokens = pp.blockTokens
+			unshift(tokens, token)
+			pp.blockTokens = tokens
+			pp.blockTokensLength = #tokens
+		end,
+		functionBody = function (self)
+			self.makeBlockTokens(self.tokens)
+			local blockTokensLength = self.blockTokensLength()
+			local counter = 0
+			while(counter <= blockTokensLength) do
+				local token = self.getBlockToken()
+				counter = counter + 1
+				if(token.value == "if") then
+					token = self.getBlockToken()
+					counter = counter + 1
+					local expr = {}
+					local exprToken = {value = "_"}
+					while(exprToken.value ~= ")") do
+						exprToken = self.getBlockToken()
+						counter = counter + 1
+						if(exprToken.value ~= ")") then
+							push(expr, exprToken.value)
+						end
+					end
+					local IfExpr = expr
+					local ifBody = {}
+					local ifBeginToken = self.getBlockToken()
+					counter = counter + 1
+					local ifBraceCounter = 1
+					while(ifBraceCounter > 0) do
+						local tok = self.getBlockToken()
+						counter = counter + 1
+						if(tok.value == "{") then
+							ifBraceCounter = ifBraceCounter + 1
+						elseif (tok.value == "}") then
+							ifBraceCounter = ifBraceCounter - 1
+						elseif ifBraceCounter > 0 then
+							push(ifBody, tok)
+						else 
+							ifBraceCounter = ifBraceCounter - 1
+						end
+					end
+				end
+				if(token.value == "while") then
+					token = self.getBlockToken()
+					counter = counter + 1
+					local expr
+					local exprToken = {value = "_"}
+					while(exprToken.value == ")") do
+						exprToken = self.getBlockToken()
+						counter = counter + 1
+						if(exprToken.value ~= ")") then
+							push(expr, exprToken.value)
+						end
+					end
+					local WhileExpr = expr
+					local whileBody = {}
+					local whileBeginToken = self.getBlockToken()
+					counter = counter + 1
+					local whileBraceCounter = 0
+					if(whileBeginToken.value == "{") then
+						whileBraceCounter = whileBraceCounter + 1
+						local tok = self.getBlockToken()
+						counter = counter + 1
+						if(tok.value == "{") then
+							whileBraceCounter = whileBraceCounter + 1
+						elseif(tok.value == "}") then
+							whileBraceCounter = whileBraceCounter - 1
+						elseif (whileBraceCounter > 0) then
+							push(whileBody, tok)
+						else
+						end
+					end
+				end
+			end
+			return {body = "FunctionBody"}
+		end
+	}
+	return XFunctionBody
+end
+
+local function Main(fields)
+	local parseTree = {}
+	local XMain = {
+		main = function (self, program)
+			local parseHelpers = ParseHelpers()
+			local lexer = Lexer()
+			local tokens = lexer:lexer(program)
+			parseHelpers:makeTokens(tokens)
+			local tokensLength = parseHelpers:tokensLength()
+			local counter = 0
+			local xfunction = {}	-- funciton hash is changed to xfunction
+			while(counter <= tokensLength) do
+				local token = parseHelpers:getToken()
+				counter = counter + 1
+				if(token.value == "func") then
+					token = parseHelpers:getToken()
+					counter = counter + 1
+					local functionName = token.value
+					parseHelpers:getToken()
+					counter = counter + 1
+					local args
+					local argToken = {value = "_"}
+					while(argToken.value ~= ")") do
+						argToken = parseHelpers:getToken()
+						counter = counter + 1
+						if( (argToken.value ~= ")") and (argToken.value ~= ",")) then
+							push(args, argToken.value)
+						end
+					end
+					local functionArgs = args
+					local functionBody = {}
+
+					local bodyBeginToken = parseHelpers:getToken()
+					counter = counter + 1
+					if(bodyBeginToken.value == "{") then
+						local untilCounter = 0
+						while(untilCounter ~= 1) do
+							local bodyToken = parseHelpers:getToken()
+							counter = counter + 1
+							local bodyNextToken = parseHelpers:nextToken()
+							if(bodyToken.value == "}" or (bodyNextToken.value == "func" or counter == tokensLength + 1)) then
+								untilCounter = 1
+							else
+								push(functionBody, bodyToken)
+							end
+						end
+					end
+					local functionBodyObject = FunctionBody({tokens = functionBody})
+					xfunction = {
+						xfunctionName = functionName,
+						xfunctionArgs = functionArgs,
+						xfunctionBody = functionBodyObject:functionBody()
+					}
+					self.parseTree.functionName = xfunction
+					xfunction = {}
+				end
+ 			end
+		end
+	}
+	return XMain
+end
+
+local program = [[
+func anotherPrint(arg){
+	if(x > 23){
+		print(arg, "\n");
+	}
+}
+func main(){
+	var sum = 12 + 14;
+	while(sum < 23){
+		print("Sum is ", sum);
+	}
+}
+]]
+
+local mainObject = Main()
+mainObject:main(program)
+
+--local mc = MakeChars()
+--mc:makechars("HELLO WORLD")
+--print(mc:programLength())
+
