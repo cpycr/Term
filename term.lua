@@ -123,8 +123,119 @@ local function CharGroups()
 	return XCharGroups
 end
 
-local mc = MakeChars()
+local function Lexer()
+	local XLexer = {
+		lexer = function (self, program)
+			local makeChars = MakeChars()
+			local charGroups = CharGroups()
 
+			local tokens = {}
+			makeChars:makechars(program)
+
+			local counter = 0
+			local programLength = makeChars:programLength()
+
+			while(counter <= programLength) do
+				::CONTINUE::
+				local currentChar = makeChars:getChar()
+				counter = counter + 1
+
+				if(charGroups:isSpaceNewLine(currentChar)) then goto CONTINUE end
+				if((currentChar == "=") and (makeChars:nextChar() == "=")) then
+					makeChars:getChar()
+					counter = counter + 1
+
+					local token = {type = "Equals", value = "=="}
+					push(tokens, token)
+					goto CONTINUE
+				end
+				if(charGroups:isOperator(currentChar)) then
+					if(currentChar == "&") then
+						local nextChar = makeChars:nextChar()
+						if(nextChar == "&") then
+							makeChars:getChar()
+							counter = counter + 1
+							local token = {type = "Operator", value = "&&"}
+							push(tokens, token)
+							goto CONTINUE
+						end
+					end
+				end
+				if(charGroups:isOperator(currentChar)) then
+					if(currentChar == "|") then
+						local nextChar = makeChars:nextChar()
+						if(nextChar == "|") then
+							makeChars:getChar()
+							counter = counter + 1
+							local token = {type = "Operator", value = "||"}
+							push(tokens, token)
+							goto CONTINUE
+						end
+					end
+				end
+				if(charGroups:isOperator(currentChar)) then
+					local token = {type = "Operator", value = currentChar}
+					push(tokens, token)
+					goto CONTINUE
+				end
+				if(charGroups:isQuote(currentChar)) then
+					local string = ""
+					local delimiter = currentChar
+					currentChar = makeChars:getChar()
+					counter = counter + 1
+					while(currentChar ~= delimiter) do
+						string = string .. currentChar
+						currentChar = makeChars:getChar()
+						counter = counter + 1
+					end
+					local token = {type = "String", value = string}
+					push(tokens, token)
+					goto CONTINUE
+				end
+				if(charGroups:isSpecialCharachter(currentChar)) then
+					local token = {type = "specialCharachter", value = currentChar}
+					push(tokens, token)
+					goto CONTINUE
+				end
+				if(charGroups:isAlpha(currentChar))	then
+					local symbol = ""
+					symbol = symbol .. currentChar
+					currentChar = makeChars:getChar()
+					counter = counter + 1
+					while(charGroups:isAlpha(currentChar)) do
+						symbol = symbol .. currentChar
+						currentChar = makeChars:getChar()
+						counter = counter + 1
+					end
+					makeChars:putChar(currentChar)
+					counter = counter - 1
+					local token = {type = "Symbol", value = symbol}
+					push(tokens, token)
+					goto CONTINUE
+				end
+				if(charGroups:isDigit(currentChar)) then
+					local number = ""
+					number = number .. currentChar
+					currentChar = makeChars:getChar()
+					counter = counter + 1
+					while(charGroups:isDigit(currentChar) or (currentChar == ".")) do
+						number = number .. currentChar
+						currentChar = makeChars:getChar()
+						counter = counter + 1
+					end
+					makeChars:putChar(currentChar)
+					counter = counter - 1
+					local token = {type = "Number", value = number}
+					push(tokens, token)
+					goto CONTINUE
+				end
+			end
+		end
+	}
+	return XLexer
+end
+
+local mc = MakeChars()
 mc:makechars("HELLO WORLD")
 print(mc:programLength())
 
