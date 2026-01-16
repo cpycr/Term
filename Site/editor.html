@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <meta charset="utf-8">
+        <title></title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+        <script src="js/sanscriptback.js"></script>
+        <link rel="preconnect" href="https://fonts.gstatic.com">
+
+        <link href="https://fonts.googleapis.com/css2?family=Ramabhadra&display=swap" rel="stylesheet">
+        <style media="screen">
+
+            #main {
+                margin: 20px;
+                max-width: 500px;
+            }
+            #editor {
+                padding: 5px;
+                font-size: 18px;
+                line-height: 24px;
+                max-width: 500px;
+                color: rgba(0, 0, 0);
+                /* font-family: "Noto Sans Telugu" */
+                /* font-family: 'Mandali', sans-serif; */
+                font-family: 'pothana2000';
+            }
+            #test {
+
+                margin-top: 100px;
+                max-width: 400px;
+                font-size: 17px;
+                line-height: 21px;
+                color: rgba(0, 0, 0);
+                /* font-family: "Noto Sans Telugu"
+                font-family: 'Akaya Telivigala', cursive; */
+                font-family: 'Mandali', sans-serif;
+                font-family: 'pothana2000';
+            }
+            #testheader {
+                font-family: 'Suranna', serif;
+                font-size: 20px;
+            }
+            #text {
+                margin-left: 10px;
+                margin-top: -18px;
+            }
+            #text_date {
+                margin-left: 10px;
+                margin-top: 5px;
+                color: grey;
+                font-family: helvetica;
+            }
+            #title {
+                margin-top: 200px;
+                font-family: 'Akaya Telivigala', cursive;
+                font-size: 60px;
+            }
+            #replies {
+                margin-top: 50px;
+                font-family: 'pothana2000';
+            }
+            li {
+                font-size: 14px;
+                margin: 0;
+                padding: 0.2em;
+                line-height: 1em;
+                font-family: 'pothana2000';
+            }
+            a {
+                text-decoration: none;
+            }
+            #pagetitle {
+                font-size: 40px;
+                font-family:'Ramabhadra', sans-serif;
+
+            }
+        </style>
+
+        <script type="text/javascript">
+            var lswitch = 41;
+            function setInputSelection(input, startPos, endPos) {
+              if (input.setSelectionRange) {
+                  input.focus();
+                  input.setSelectionRange(startPos, endPos);
+              } else if (input.createTextRange) {
+                  var range = input.createTextRange();
+                  range.collapse(true);
+                  range.moveStart('character', startPos);
+                  range.moveEnd('character', endPos);
+                  range.select();
+                }
+            }
+            function setInputPos(input, pos) {
+                setInputSelection(input, pos, pos);
+            }
+            function TranslateMe(box) {
+                var editor = document.getElementById(box);
+                var t1 = editor.value.slice(0, editor.selectionStart);
+                var res = t1.split(" ");
+                if(lswitch == 41) {
+                  res[res.length-1]  = res[res.length-1].replace(res[res.length-1], Sanscript.t(res[res.length-1], 'telugu', 'itrans'));
+                  res[res.length-1]  = res[res.length-1].replace(res[res.length-1], Sanscript.t(res[res.length-1], 'itrans', 'telugu'));
+                }
+                editor.value = res.join(" ") + editor.value.slice(editor.selectionStart);
+                setInputPos(editor, res.join(" ").length);
+            }
+        </script>
+    </head>
+
+    <body>
+        <div class="main" id="main">
+
+            <div id="pagetitle">వ్యాసం</div>
+            <div><input type="text" name="" value=""> <button type="button" name="button">Search</button> </div>
+
+            <form class="" action="index.html" method="post">
+                <div class="editorarea">
+                    <textarea autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" name="name" rows="8" cols="80" class="editor" id="editor"></textarea>
+                </div>
+                <div class="submitbutton">
+                    <button type="submit" name="button">post</button>
+                </div>
+            </form>
+
+
+            <div class="test" id="test">
+
+                <div class="text" id="text">
+                    భారతదేశంలో బ్రిటిషు పాలనకు వ్యతిరేకంగా జరిపిన శాసనోల్లంఘనలో భాగంగా, మహాత్మా గాంధీ నేతృత్వంలో భారత జాతీయ కాంగ్రెసు జరిపిన అహింసాయుత సత్యాగ్రహమే ఉప్పు సత్యాగ్రహం. దీన్ని దండి సత్యాగ్రహం అనీ, దండి యాత్ర అనీ, దండి మార్చ్ అనీ కూడా పిలుస్తారు. ఉప్పు పన్నును ధిక్కరిస్తూ గాంధీ, 1930 మార్చి 12 నుండి 1930 ఏప్రిల్ 6 వరకు, వేలమంది సత్యాగ్రహులతో కలిసి 384 కిలోమీటర్ల దూరం పాదయాత్ర చేసి గుజరాత్ తీరం లోని దండి వద్ద ఉప్పు తయారు చేసాడు.<br><br> శాసనోల్లంఘన ఉద్యమంలో ఎక్కువ మంది పాల్గొనేలా స్ఫూర్తినిచ్చే బలమైన ప్రారంభ ఘటనగా దండి యాత్ర ఉపయోగపడింది. ముప్పై సంవత్సరాల తరువాత, ఈ సత్యాగ్రహ ఆయుధం, ఈ దండి యాత్ర అమెరికన్ పౌర హక్కుల కార్యకర్త మార్టిన్ లూథర్ కింగ్ జూనియర్ పైన, నల్లజాతీయుల పౌరహక్కుల కోసం ఆయన చేసిన పోరాటం పైనా బలమైన ప్రభావాన్ని చూపాయి.
+                </div>
+
+            </div>
+            <div class="replies" id="replies">
+                <div style="font-family: 'helvetica';">Replies: </div>
+                <ul>
+                    <li><a href="#" style="">పాల్గొనేలా స్ఫూర్తినిచ్చే బలమైన ప్రారంభ ఘటనగా దండి యాత్ర ఉపయోగపడింద</a></li>
+                    <li><a href="#" style="">బ్రిటిషు పాలనకు వ్యతిరేకంగా జరిపిన శాసనోల్లంఘనలో భాగంగ</a></li></li>
+                </ul>
+
+            </div>
+
+
+        </div>
+
+
+        <script type="text/javascript">
+            $( "#editor" ).keyup(function( event ) {
+              var j = event.which;
+              if ( j == 37 || j == 39 ) {
+              }
+              else if ( j == 38 || j == 40 ) {
+              }
+              else {
+                TranslateMe('editor');
+              }
+            });
+        </script>
+    </body>
+</html>
