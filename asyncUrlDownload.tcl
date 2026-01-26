@@ -3,10 +3,9 @@ package require tls
 http::register https 443 ::tls::socket
 
 set urls {
-    https://www.google.com
-    https://www.wikipedia.org
-    https://www.facebook.com
-    https://www.bing.com
+    https://www.example.com
+    https://www.example.org
+    https://www.example.net
 }
 
 # Counter to track completed downloads
@@ -46,3 +45,4 @@ foreach url $urls {
 
 # Enter event loop
 vwait ::done
+
